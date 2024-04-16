@@ -423,11 +423,11 @@ class MultiNetwork(nn.Module):
                 self.dropout_after_direction_layer = nn.Dropout(self.view_dependent_dropout_probability)
             
         else:
-            layers = [linear_layer(self.num_position_channels + self.num_direction_channels, self.hidden_layer_size), self.activation]
+            layers = [linear_layer(self.num_position_channels + self.num_direction_channels, self.hidden_layer_size, self.nonlinearity), self.activation]
             nonlinearity_params = nonlinearity_params.copy().update({'is_first': False})
             for _ in range(self.num_hidden_layers): # TODO: should be also self.num_hidden_layers - 1
-                layers += [linear_layer(self.hidden_layer_size, self.hidden_layer_size), self.activation]
-            layers += [linear_layer(self.hidden_layer_size, self.num_output_channels)]
+                layers += [linear_layer(self.hidden_layer_size, self.hidden_layer_size, self.nonlinearity), self.activation]
+            layers += [linear_layer(self.hidden_layer_size, self.num_output_channels, self.nonlinearity)]
             self.layers = nn.Sequential(*layers)
     
     # needed for fused kernel
@@ -525,7 +525,13 @@ class MultiNetwork(nn.Module):
             else:
                 return result
         else:
-            return self.layers(x)
+            for layer in self.layers:
+                if isinstance(layer, MultiNetworkLinear):
+                    x = layer(x, batch_size_per_network)
+                else:
+                    x = layer(x)
+            return x
+            # return self.layers(x)
             
 
     def extract_single_network(self, network_index):
