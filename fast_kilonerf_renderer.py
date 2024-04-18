@@ -144,7 +144,9 @@ class FastKiloNeRFRenderer():
             # Evaluate the network
             network_eval_num_blocks = -1 # ignored currently
             compute_capability = torch.cuda.get_device_capability(query_indices.device)
-            if compute_capability == (7, 5):
+            if compute_capability == (8, 9):
+                network_eval_num_threads = 256 # for some reason the compiler uses more than 255 registers for this CC, so we cannot launch 512 threads
+            elif compute_capability == (7, 5):
                 network_eval_num_threads = 512 # for some reason the compiler uses more than 96 registers for this CC, so we cannot launch 640 threads
             else:
                 network_eval_num_threads = 640
