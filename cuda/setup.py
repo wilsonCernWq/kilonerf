@@ -22,10 +22,10 @@ print(f"Minimum Compute Capability: {min_compute_capability}")
 
 # Compile flags
 cxx_flags = [
-    # "-std=c++17"
+    "-std=c++17"
 ]
 nvcc_flags = [
-	# "-std=c++17",
+	"-std=c++17",
     "-Xptxas", 
     "-v,-warn-lmem-usage"
 ]
